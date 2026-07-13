@@ -37,12 +37,23 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+Console.WriteLine($"Endpoint: {endpoint}");
+Console.WriteLine($"Key: {key}");
 
-// В кінці вашого Program.cs, перед app.Run();
-using (var scope = app.Services.CreateScope())
+// Initialize database with error handling
+try
 {
-    var context = scope.ServiceProvider.GetRequiredService<Api_1.Data.ApplicationDbContext>();
-    await context.Database.EnsureCreatedAsync(); // Створює базу та контейнер, якщо вони відсутні
+    using (var scope = app.Services.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<Api_1.Data.ApplicationDbContext>();
+        await context.Database.EnsureCreatedAsync(); // Створює базу та контейнер, якщо вони відсутні
+    }
+}
+catch (Exception ex)
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    logger.LogError(ex, "An error occurred while initializing the database.");
+    throw;
 }
 
 app.Run();
