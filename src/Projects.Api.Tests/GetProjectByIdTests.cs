@@ -1,22 +1,22 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Api_1.Controllers;
-using Api_1.Data;
-using Api_1.Models;
+using Projects.Api.Controllers;
+using Projects.Api.Data;
+using Projects.Api.Models;
 using Xunit;
 
-namespace Api_1.Tests;
+namespace Projects.Api.Tests;
 
 public class GetProjectByIdTests
 {
-    private ApplicationDbContext CreateInMemoryDbContext()
+    private ProjectsDbContext CreateInMemoryDbContext()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        var options = new DbContextOptionsBuilder<ProjectsDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
 
-        return new ApplicationDbContext(options);
+        return new ProjectsDbContext(options);
     }
 
     [Fact]

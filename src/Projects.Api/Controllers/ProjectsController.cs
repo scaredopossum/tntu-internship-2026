@@ -1,17 +1,17 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Api_1.Data;
-using Api_1.Models;
+using Projects.Api.Data;
+using Projects.Api.Models;
 
-namespace Api_1.Controllers;
+namespace Projects.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")] // Відповідає шляху /api/v1/projects
 public class ProjectsController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ProjectsDbContext _context;
 
-    public ProjectsController(ApplicationDbContext context)
+    public ProjectsController(ProjectsDbContext context)
     {
         _context = context;
     }

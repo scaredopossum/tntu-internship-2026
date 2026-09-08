@@ -2,8 +2,8 @@ using Azure.Identity;
 
 using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Api_1;
-using Api_1.Data;
+using Projects.Api;
+using Projects.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +33,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<ProjectsDbContext>(options =>
     options.UseCosmos(endpoint, key, databaseName, cosmosOptions =>
     {
         cosmosOptions.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
@@ -74,7 +74,7 @@ try
 {
     using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<Api_1.Data.ApplicationDbContext>();
+        var context = scope.ServiceProvider.GetRequiredService<Projects.Api.Data.ProjectsDbContext>();
         await context.Database.EnsureCreatedAsync(); // Створює базу та контейнер, якщо вони відсутні
         logger.LogInformation("Database initialization successful");
     }

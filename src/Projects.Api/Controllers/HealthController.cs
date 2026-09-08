@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Mvc;
-using Api_1.Data;
+using Projects.Api.Data;
 
-namespace Api_1.Controllers
+namespace Projects.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class HealthController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class HealthController : ControllerBase
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<HealthController> _logger;
+    private readonly ProjectsDbContext _context;
+    private readonly ILogger<HealthController> _logger;
 
-        public HealthController(ApplicationDbContext context, ILogger<HealthController> logger)
+    public HealthController(ProjectsDbContext context, ILogger<HealthController> logger)
         {
             _context = context;
             _logger = logger;
@@ -33,4 +33,3 @@ namespace Api_1.Controllers
             }
         }
     }
-}

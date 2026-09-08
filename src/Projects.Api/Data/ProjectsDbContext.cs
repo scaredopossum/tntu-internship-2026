@@ -1,11 +1,11 @@
-﻿using Api_1.Models;
+﻿using Projects.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api_1.Data;
+namespace Projects.Api.Data;
 
-public class ApplicationDbContext : DbContext
+public class ProjectsDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    public ProjectsDbContext(DbContextOptions<ProjectsDbContext> options)
         : base(options)
     {
     }

@@ -221,4 +221,29 @@ public class TasksController : ControllerBase
 
         return Ok(task);
     }
+
+    [HttpDelete("{taskId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DeleteTask(Guid projectId, Guid taskId)
+    {
+        var task = await _context.Tasks
+            .FirstOrDefaultAsync(t => t.Id == taskId.ToString() && t.ProjectId == projectId.ToString());
+
+        if (task == null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Task not found",
+                Detail = $"Task '{taskId}' was not found in project '{projectId}'."
+            });
+        }
+
+        // Permanently remove the task from Cosmos DB (domain rule BR-T08)
+        _context.Tasks.Remove(task);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

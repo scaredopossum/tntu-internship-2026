@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>Api_1</RootNamespace>
+    <RootNamespace>Projects.Api</RootNamespace>
     <UserSecretsId>84d8111f-b2a9-48bd-9bb7-aee9e7eb2af1</UserSecretsId>
   </PropertyGroup>
 

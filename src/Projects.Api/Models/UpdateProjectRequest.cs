@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Api_1.Models;
+namespace Projects.Api.Models;
 
 public class UpdateProjectRequest
 {

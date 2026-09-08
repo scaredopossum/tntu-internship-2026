@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Api_1;
-using Api_1.Data; // Переконайтеся, що це простір імен вашого проекту
+using Projects.Api;
+using Projects.Api.Data; // Переконайтеся, що це простір імен вашого проекту
 
 [ApiController]
 [Route("[controller]")]
 public class DatabaseController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
+    private readonly ProjectsDbContext _context;
 
     // Впровадження залежності (Dependency Injection) через конструктор
-    public DatabaseController(ApplicationDbContext context)
+    public DatabaseController(ProjectsDbContext context)
     {
         _context = context;
     }
