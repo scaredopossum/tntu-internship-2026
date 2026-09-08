@@ -1,21 +1,33 @@
-using Azure.Identity;
-
-using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Api_1;
-using Api_1.Data;
+using Tasks.Api.Clients;
+using Tasks.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add user secrets BEFORE reading configuration
-//if (builder.Environment.IsDevelopment())
-//{
-    builder.Configuration.AddUserSecrets<Program>();
-//}
+builder.Configuration.AddUserSecrets<Program>();
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// Register the typed HttpClient
+builder.Services.AddHttpClient<IProjectsApiClient, ProjectsApiClient>(client =>
+{
+    var baseUrl = builder.Configuration["Services:ProjectsApiUrl"];
+    if (string.IsNullOrEmpty(baseUrl))
+    {
+        throw new InvalidOperationException("ProjectsApiUrl is not configured.");
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// Register TasksDbContext
 string endpoint = builder.Configuration["CosmosDb:AccountEndpoint"] ?? throw new InvalidOperationException("CosmosDb:AccountEndpoint is not configured");
 string key = builder.Configuration["CosmosDb:AccountKey"] ?? throw new InvalidOperationException("CosmosDb:AccountKey is not configured");
-string databaseName = "TaskBoard";
+string databaseName = builder.Configuration["CosmosDb:DatabaseName"] ?? "TaskBoard";
 
 // Validate configuration
 if (string.IsNullOrWhiteSpace(endpoint))
@@ -23,28 +35,14 @@ if (string.IsNullOrWhiteSpace(endpoint))
 if (string.IsNullOrWhiteSpace(key))
     throw new InvalidOperationException("CosmosDb:AccountKey cannot be empty");
 
-// Normalize endpoint - remove trailing slash if present
 endpoint = endpoint.TrimEnd('/');
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<TasksDbContext>(options =>
     options.UseCosmos(endpoint, key, databaseName, cosmosOptions =>
     {
         cosmosOptions.ConnectionMode(Microsoft.Azure.Cosmos.ConnectionMode.Gateway);
     })
 );
-
-builder.Services.AddLogging(config =>
-{
-    config.AddConsole();
-    config.SetMinimumLevel(LogLevel.Information);
-});
 
 var app = builder.Build();
 
@@ -52,16 +50,12 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Projects API V1");
-    // Optional: Sets Swagger as the root landing page (e.g., https://your-app.azurewebsites.net/)
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tasks API V1");
+    // Sets Swagger as the root landing page
     c.RoutePrefix = string.Empty;
 });
 
-// Fix HTTPS redirect for Swagger in non-development environments
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHttpsRedirection();
-}
+app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -74,8 +68,8 @@ try
 {
     using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<Api_1.Data.ApplicationDbContext>();
-        await context.Database.EnsureCreatedAsync(); // Створює базу та контейнер, якщо вони відсутні
+        var context = scope.ServiceProvider.GetRequiredService<TasksDbContext>();
+        await context.Database.EnsureCreatedAsync();
         logger.LogInformation("Database initialization successful");
     }
 }
@@ -88,7 +82,5 @@ catch (Exception ex)
         throw;
     }
 }
-
-
 
 app.Run();

@@ -13,9 +13,10 @@ public class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
+        // Configure Project entity for Cosmos DB
         modelBuilder.Entity<Project>()
-            .ToContainer("projects") 
-            .HasPartitionKey(p => p.Id); 
+            .ToContainer("projects")
+            .HasPartitionKey(p => p.Id)
+            .HasNoDiscriminator(); // Disable EF Core's default discriminator
     }
 }

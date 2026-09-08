@@ -14,18 +14,18 @@ public class DatabaseController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("test-connection")]
-    public async Task<IActionResult> TestConnection()
-    {
-        try
-        {
-            await _context.Database.EnsureCreatedAsync();
+    //[HttpGet("test-connection")]
+    //public async Task<IActionResult> TestConnection()
+    //{
+    //    try
+    //    {
+    //        await _context.Database.EnsureCreatedAsync();
 
-            return Ok("Successfully connected to Cosmos DB.");
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Connection failed: {ex.Message}");
-        }
-    }
+    //        return Ok("Successfully connected to Cosmos DB.");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return StatusCode(500, $"Connection failed: {ex.Message}");
+    //    }
+    //}
 }
