@@ -44,6 +44,9 @@ builder.Services.AddDbContext<TasksDbContext>(options =>
     })
 );
 
+// Enable standard RFC 7807 Problem Details for all unhandled errors and framework validations[cite: 9]
+builder.Services.AddProblemDetails();
+
 var app = builder.Build();
 
 // Enable Swagger across all environments (Development & Production)

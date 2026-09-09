@@ -82,10 +82,29 @@ public class TasksController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<TaskItem>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status502BadGateway)]
-    public async Task<IActionResult> GetTasksByProject(Guid projectId)
+    public async Task<IActionResult> GetTasksByProject(Guid projectId, [FromQuery] string? status)
     {
+        // Validate optional status query parameter if provided
+        if (!string.IsNullOrEmpty(status))
+        {
+            var allowedStatuses = new[] { "ToDo", "InProgress", "Done" };
+            if (!allowedStatuses.Contains(status))
+            {
+                return BadRequest(new ValidationProblemDetails(new Dictionary<string, string[]>
+            {
+                { "status", new[] { "Status must be ToDo, InProgress, or Done." } }
+            })
+                {
+                    Status = StatusCodes.Status400BadRequest,
+                    Title = "Invalid status filter",
+                    Detail = $"The status '{status}' is not valid. Allowed values are: ToDo, InProgress, Done."
+                });
+            }
+        }
+
         ProjectDto? project;
         try
         {
@@ -101,7 +120,7 @@ public class TasksController : ControllerBase
             });
         }
 
-        // Validate project exists before returning tasks
+        // Validate project exists before returning tasks[cite: 3]
         if (project == null)
         {
             return NotFound(new ProblemDetails
@@ -112,9 +131,16 @@ public class TasksController : ControllerBase
             });
         }
 
-        // Filter by partition key and order by CreatedAt descending[cite: 3]
-        var tasks = await _context.Tasks
-            .Where(t => t.ProjectId == projectId.ToString())
+        var query = _context.Tasks
+            .Where(t => t.ProjectId == projectId.ToString());
+
+        // Apply status filter if provided (US-016)[cite: 12]
+        if (!string.IsNullOrEmpty(status))
+        {
+            query = query.Where(t => t.Status == status);
+        }
+
+        var tasks = await query
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
 

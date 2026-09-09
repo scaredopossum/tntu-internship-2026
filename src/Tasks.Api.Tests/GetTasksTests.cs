@@ -40,7 +40,7 @@ public class GetTasksTests
         var controller = new TasksController(mockClient.Object, context);
 
         // Act
-        var result = await controller.GetTasksByProject(projectId);
+        var result = await controller.GetTasksByProject(projectId, status: null);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -66,7 +66,7 @@ public class GetTasksTests
         var controller = new TasksController(mockClient.Object, context);
 
         // Act
-        var result = await controller.GetTasksByProject(projectId);
+        var result = await controller.GetTasksByProject(projectId, status: null);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -90,7 +90,7 @@ public class GetTasksTests
         var controller = new TasksController(mockClient.Object, context);
 
         // Act
-        var result = await controller.GetTasksByProject(projectId);
+        var result = await controller.GetTasksByProject(projectId, status: null);
 
         // Assert
         var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);

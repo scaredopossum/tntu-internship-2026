@@ -1,17 +1,17 @@
 # TNTU Internship 2026 — Team Task Board
 
-A **1-month student internship project** building a minimal **microservices-based task board** with **ASP.NET Core**, **EF Core**, **Azure Cosmos DB**, and **GitHub Actions** CI/CD.
+A microservices-based task board built with **ASP.NET Core**, **EF Core**, **Azure Cosmos DB**, and **GitHub Actions** CI/CD.
 
-Students implement two cooperating APIs — **Projects** and **Tasks** — deploy them to Azure free tier, and learn modern backend development practices along the way.
+The system consists of two cooperating Web APIs — **Projects.Api** and **Tasks.Api** — deployed to Azure App Service and integrated with Azure Cosmos DB.
 
 ---
 
-## What you will build
+## Architecture Overview
 
 | Service | Responsibility |
 |---------|----------------|
 | **Projects.Api** | Create, list, update, and archive projects |
-| **Tasks.Api** | Manage tasks within projects; validates projects via HTTP |
+| **Tasks.Api** | Manage tasks within projects; validates project existence via HTTP |
 
 ```mermaid
 flowchart LR
@@ -20,9 +20,6 @@ flowchart LR
   TasksApi -->|validate project| ProjectsApi
   ProjectsApi --> Cosmos[(Cosmos DB)]
   TasksApi --> Cosmos
-```
-
-Implementation code will live under `src/` when development begins. This repository currently contains **project documentation only**.
 
 ---
 
@@ -40,12 +37,6 @@ Start here based on your role:
 
 ---
 
-## Quick start for students
-
-1. Complete the [prerequisites checklist](docs/prerequisites/development-prerequisites.md#verification-steps).
-2. Read [architecture](docs/architecture/architecture-and-tech-stack.md) and [domain overview](docs/domain/system-overview.md).
-3. Follow the [Week 1 schedule](docs/internship-plan/one-month-schedule.md#week-1--environment-and-projects-api-foundation).
-4. Implement user stories in order starting with [US-001](docs/user-stories/US-001-create-project.md).
 
 ---
 
@@ -66,48 +57,103 @@ Full details and documentation links: [Architecture and Tech Stack](docs/archite
 
 ---
 
-## User stories at a glance
+## Prerequisites
 
-| Sprint | Stories | Focus |
-|--------|---------|-------|
-| Week 1 | US-001 – US-003 | Projects API — create, list, get |
-| Week 2 | US-004 – US-008 | Projects complete + Tasks API start |
-| Week 3 | US-009 – US-015 | Tasks complete + Azure + CI/CD |
-| Week 4 | US-016 – US-018 (optional) | Filter, Docker, final demo |
+- .NET 8 SDK
+- Azure Cosmos DB Emulator OR Azure Cosmos DB connection string
+- Git
 
-Full index: [User Stories](docs/user-stories/README.md).
+---
+
+## Configuration
+
+Ensure the following configuration settings or environment variables are configured for local execution:
+
+Projects.Api (src/Projects.Api/appsettings.Development.json):
+
+```
+{
+  "CosmosDb": {
+    "ConnectionString": "<your-cosmosdb-connection-string>",
+    "DatabaseName": "TaskBoardDb"
+  }
+}
+```
+
+Tasks.Api (src/Tasks.Api/appsettings.Development.json):
+
+```
+{
+  "CosmosDb": {
+    "ConnectionString": "<your-cosmosdb-connection-string>",
+    "DatabaseName": "TaskBoardDb"
+  },
+  "Services": {
+    "ProjectsApiUrl": "http://localhost:5000"
+  }
+}
+```
 
 ---
 
 ## Repository structure
 
 ```
-TNTU.Internship2026/
-├── README.md
-└── docs/
-    ├── architecture/
-    │   └── architecture-and-tech-stack.md
-    ├── prerequisites/
-    │   └── development-prerequisites.md
-    ├── domain/
-    │   └── system-overview.md
-    ├── internship-plan/
-    │   └── one-month-schedule.md
-    └── user-stories/
-        ├── README.md
-        └── US-001-create-project.md … US-018-docker-compose-local.md
+.
+├── .github/
+│   └── workflows/
+│       ├── projects-ci.yml
+│       └── tasks-ci.yml
+├── src/
+│   ├── Projects.Api/
+│   ├── Projects.Api.Tests/
+│   ├── Tasks.Api/
+│   └── Tasks.Api.Tests/
+├── docs/
+└── README.md
 ```
 
-Planned source layout (created during Week 1):
+---
+
+## Execution
+
+1. Start Projects.Api:
 
 ```
-src/
-├── Projects.Api/
-├── Projects.Api.Tests/
-├── Tasks.Api/
-├── Tasks.Api.Tests/
-└── docker-compose.yml          # optional, week 4
+dotnet run --project src/Projects.Api/Projects.Api.csproj --urls "http://localhost:5000"
 ```
+
+2. Start Tasks.Api (in a separate terminal):
+
+```
+dotnet run --project src/Tasks.Api/Tasks.Api.csproj --urls "http://localhost:5001"
+```
+
+3. Endpoints:
+
+- Projects API Swagger: http://localhost:5000/swagger
+
+- Projects API Health: http://localhost:5000/health
+
+- Tasks API Swagger: http://localhost:5001/swagger
+
+- Tasks API Health: http://localhost:5001/health
+
+---
+
+## Known limitations
+
+1. Authentication & Authorization:
+  Endpoints do not enforce JWT or API Key authentication; all routes are publicly accessible within the current MVP specification.
+
+2. Free Tier Latency & Cold Starts:
+  Azure App Service (F1) and Azure Cosmos DB Free Tier instances experience cold start delays when idle and have Request Unit (RU/s) throughput limits under high concurrency.
+
+3. Synchronous Cross-Service HTTP Dependency:
+  Tasks.Api validates ProjectId existence synchronously over HTTP via Projects.Api. If Projects.Api experiences latency or failure, dependent task operations return 502 Bad Gateway.  
+
+4. No Cascading Deletion / Saga Management:
+  Task hard deletion is supported per task. Archiving or deleting a project does not perform asynchronous cascading operations on associated task documents across Cosmos DB partitions.
 
 ---
 

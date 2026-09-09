@@ -51,7 +51,7 @@ public class ProjectsController : ControllerBase
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(Project), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetProjectById(Guid id)
     {
         // Convert the Guid back to string since the Cosmos DB Id property is a string
