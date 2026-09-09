@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using Api_1.Models;
+using Projects.Api.Models;
 using Xunit;
 
-namespace Api_1.Tests;
+namespace Projects.Api.Tests;
 
 public class ProjectValidationTests
 {
